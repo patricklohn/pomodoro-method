@@ -3,7 +3,8 @@ import {HomeContainer, FormContainer, CountdownContainer, Separator, TaskInput, 
 import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod'
 import * as zod from 'zod';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { differenceInSeconds } from 'date-fns'
 
 const newCycleFormvalidationSchema = zod.object({
         task: zod.string().min(4, 'Informe a tarefa'),
@@ -17,6 +18,7 @@ interface Cycle {
     task: string;
     minutesAmount: number;
     isActive?: boolean;
+    startDate?: Date
 }
 
 function Home() {
@@ -52,19 +54,21 @@ function Home() {
             id,
             task: data.task,
             minutesAmount: data.minutesAmount,
+            startDate: new Date(),
         }
-
-        setCycles((state) => [...cycles, newCycle])
+        setCycles(() => [...cycles, newCycle])
         setActiveCycledId(id)
 
         reset();
     }
 
-    console.log(cycles)
-
-    // function resetForm() {
-    //     setTask('');
-    // }
+    useEffect(()=> {
+            if(activeCycle){
+                setInterval(() => {
+                    setAmountSecondsPassed(differenceInSeconds(new Date(), activeCycle.startDate!))
+                },1000)
+            }
+    }, [activeCycle])
 
     return (
         <HomeContainer>
