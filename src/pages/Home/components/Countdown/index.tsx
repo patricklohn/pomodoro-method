@@ -1,17 +1,26 @@
-import React, { useEffect } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import { CountdownContainer, Separator } from './styles'
 import { differenceInSeconds } from 'date-fns';
+import { CyclesContext } from '../../index';
 
-interface CountdownProps {
-  activeCycle: any;
-  setCycles: any;
-  activeCycleId: any;
-}
+// interface CountdownProps {
+//   activeCycle: any;
+//   setCycles: any;
+//   activeCycleId: any;
+// }
 
-const Countdown = ({activeCycle, setCycles, activeCycleId}: CountdownProps) => {
+const Countdown = () => {
+    const {activeCycle, activeCycleId, markCurrentCyclesAsFinashed} = useContext(CyclesContext);
+
   const [amountSecondsPassed, setAmountSecondsPassed] = useState(0)
   const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0 ;
 
+  const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0;
+
+    const minutesAmount = Math.floor(currentSeconds / 60)
+    const secondsAmount = currentSeconds % 60
+    const minutes = String(minutesAmount).padStart(2, '0')
+    const seconds = String(secondsAmount).padStart(2, '0')
 
   useEffect(()=> {
             let interval: number;
@@ -21,15 +30,7 @@ const Countdown = ({activeCycle, setCycles, activeCycleId}: CountdownProps) => {
                     const secondsDifference = differenceInSeconds(new Date(), activeCycle.startDate!)
 
                     if(secondsDifference >= totalSeconds){
-                        setCycles((state) =>
-                            state.map((cycle) => {
-                                if (cycle.id === activeCycleId){
-                                    return {...cycle, interruptedDate: new Date(),}
-                                }else{
-                                    return cycle
-                                }
-                        }) 
-                    )
+                    markCurrentCyclesAsFinashed()
                     setAmountSecondsPassed(totalSeconds)
                     clearInterval(interval)
                 } else {setAmountSecondsPassed(secondsDifference)}
@@ -39,7 +40,7 @@ const Countdown = ({activeCycle, setCycles, activeCycleId}: CountdownProps) => {
             return () => {
                 clearInterval(interval)
             }
-    }, [activeCycle, totalSeconds, activeCycle])
+    }, [activeCycle, totalSeconds, activeCycleId, markCurrentCyclesAsFinashed])
 
   return (
     <>
