@@ -13,7 +13,7 @@ interface createNewCycle {
 
 interface CyclesContextType {
   cycles: Cycle[];
-  activeCycle: Cycle;
+  activeCycle: Cycle | undefined;
   activeCycleId: string | null;
   amountSecondsPassed: number;
   markCurrentCycleAsFinished: () => void;
@@ -43,7 +43,7 @@ export function CyclesContextProvider({
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId);
 
   function markCurrentCycleAsFinished() {
-    dispatch(markCurrentCycleAsFinishedAction(activeCycleId));
+    dispatch(markCurrentCycleAsFinishedAction());
     //setActiveCycledId(null);
   }
 
@@ -52,7 +52,7 @@ export function CyclesContextProvider({
   }
 
   function interruptCurrentCycle() {
-    dispatch(interruptCurrentCycleAction(activeCycleId));
+    dispatch(interruptCurrentCycleAction());
 
     //setActiveCycledId(null);
   }

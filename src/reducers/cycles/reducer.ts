@@ -1,4 +1,5 @@
 import { ActionTypes } from "./actions";
+import { produce } from "immer";
 
 export interface Cycle {
   id: string;
@@ -17,35 +18,51 @@ interface CyclesState {
 export function CyclesReducer(state: CyclesState, action: any) {
       switch (action.type) {
         case ActionTypes.ADD_NEW_CYCLE:
-          return {
-            ...state,
-            cycles: [...state.cycles, action.payload],
-            activeCycleId: action.payload.id,
-          };
+          return produce(state, draft =>{
+              draft.cycles.push(action.payload)
+              draft.activeCycleId = action.payload.id
+            })
+            // {...state,
+            // cycles: [...state.cycles, action.payload],
+            // activeCycleId: action.payload.id,}
+            
         case ActionTypes.INTERRUPT_CURRENT_CYCLE:
-          return {
-            ...state,
-            cycles: state.cycles.map((cycle) => {
-              if (cycle.id === state.activeCycleId) {
-                return { ...cycle, interruptedDate: new Date() };
-              } else {
-                return cycle;
-              }
-            }),
-            activeCycleId: null,
-          };
-        case ActionTypes.MARK_CURRENTE_CYCLE_AS_FINISH:
-          return {
-            ...state,
-            cycles: state.cycles.map((cycle) => {
-              if (cycle.id === state.activeCycleId) {
-                return { ...cycle, finishedDate: new Date() };
-              } else {
-                return cycle;
-              }
-            }),
-            activeCycleId: null,
-          };
+          const currentCycleIndex = state.cycles.findIndex(cycle => cycle.id === state.activeCycleId)
+              if(currentCycleIndex < 0) return state
+          return produce(state, draft =>{
+              draft.activeCycleId = null
+              draft.cycles[currentCycleIndex].interruptedDate = new Date()
+            })
+          // {
+          //   ...state,
+          //   cycles: state.cycles.map((cycle) => {
+          //     if (cycle.id === state.activeCycleId) {
+          //       return { ...cycle, interruptedDate: new Date() };
+          //     } else {
+          //       return cycle;
+          //     }
+          //   }),
+          //   activeCycleId: null,
+          // };
+        case ActionTypes.MARK_CURRENTE_CYCLE_AS_FINISH:{
+          // return {
+          //   ...state,
+          //   cycles: state.cycles.map((cycle) => {
+          //     if (cycle.id === state.activeCycleId) {
+          //       return { ...cycle, finishedDate: new Date() };
+          //     } else {
+          //       return cycle;
+          //     }
+          //   }),
+          //   activeCycleId: null,
+          // };
+          const currentCycleIndex = state.cycles.findIndex(cycle => cycle.id === state.activeCycleId)
+              if(currentCycleIndex < 0) return state
+          return produce(state, draft =>{
+              draft.activeCycleId = null
+              draft.cycles[currentCycleIndex].finishedDate = new Date()
+          })
+        }
         default:
           return state;
       }
